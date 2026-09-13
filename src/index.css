@@ -1,0 +1,92 @@
+:root {
+  --bg: #0b0b0c;
+  --panel: rgba(14, 14, 16, 0.78);
+  --line: rgba(255, 255, 255, 0.1);
+  --text: #f4f1ea;
+  --muted: #9a958c;
+  --accent: #d4c4a8;
+}
+
+* { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  background: var(--bg);
+  color: var(--text);
+  font-family: Inter, system-ui, sans-serif;
+  overflow: hidden;
+}
+
+button, input, label { font-family: inherit; }
+
+button {
+  background: transparent;
+  color: var(--text);
+  border: 1px solid var(--line);
+  padding: 8px 12px;
+  border-radius: 2px;
+  cursor: pointer;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  font-size: 10px;
+}
+
+button.active, button:hover { border-color: var(--accent); color: var(--accent); }
+button:disabled { opacity: 0.35; cursor: not-allowed; }
+input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+.topbar {
+  position: absolute;
+  top: 20px;
+  left: 24px;
+  right: 24px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  pointer-events: none;
+  z-index: 2;
+}
+.topbar .row { pointer-events: auto; gap: 8px; display: flex; }
+.brand {
+  font-family: "Cormorant Garamond", serif;
+  font-size: 28px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+}
+.sub { color: var(--muted); font-size: 11px; margin-top: 4px; letter-spacing: 0.08em; }
+
+.panel {
+  position: absolute;
+  right: 20px;
+  bottom: 20px;
+  width: 300px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  backdrop-filter: blur(16px);
+  padding: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  z-index: 2;
+}
+
+.row { display: flex; gap: 8px; flex-wrap: wrap; }
+.notice { color: var(--muted); font-size: 11px; line-height: 1.45; }
+.check { display: flex; gap: 8px; align-items: center; font-size: 11px; color: var(--muted); }
+
+.overlay {
+  position: absolute;
+  left: 24px;
+  bottom: 20px;
+  width: 340px;
+  background: var(--panel);
+  border: 1px solid var(--line);
+  padding: 16px;
+  z-index: 2;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--muted);
+}
+.overlay b { color: var(--text); display: block; margin-bottom: 8px; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
+.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+.grid3 button { font-size: 8px; padding: 8px 4px; }
