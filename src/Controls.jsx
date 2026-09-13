@@ -94,12 +94,11 @@ export default function Controls() {
           <h1 className="brand">Solenne</h1>
           <p className="sub">Synthetic fashion viewer · fictional adult</p>
         </div>
-        <div className="row" role="tablist" aria-label="Camera views">
+        <div className="row" aria-label="Camera views">
           {Object.entries(HERO_VIEWS).map(([k, view]) => (
             <button
               key={k}
-              role="tab"
-              aria-selected={v.heroView === k}
+              aria-pressed={v.heroView === k}
               className={v.heroView === k ? "active" : ""}
               onClick={() => v.setHeroView(k)}
             >
@@ -111,12 +110,11 @@ export default function Controls() {
 
       <aside className="panel" role="region" aria-label="Viewer controls">
         <Row label="Clothing">
-          <div className="row" role="radiogroup" aria-label="Outfit selection">
+          <div className="row" aria-label="Outfit selection">
             {["none", "lingerie", "casual", "dress"].map((id) => (
               <button
                 key={id}
-                role="radio"
-                aria-checked={v.look === id}
+                aria-pressed={v.look === id}
                 className={v.look === id ? "active" : ""}
                 onClick={() => v.setLook(id)}
               >
@@ -124,8 +122,7 @@ export default function Controls() {
               </button>
             ))}
             <button
-              role="switch"
-              aria-checked={v.robe}
+              aria-pressed={v.robe}
               className={v.robe ? "active" : ""}
               onClick={() => v.setRobe((r) => !r)}
             >
@@ -216,7 +213,7 @@ export default function Controls() {
             onChange={onFace}
             aria-label="Face image upload"
           />
-          {msg ? <p className="notice" role="status" live="polite">{msg}</p> : null}
+          {msg ? <p className="notice" role="status" aria-live="polite">{msg}</p> : null}
           {!v.clothed ? <p className="notice">Enable casual or dress to use a face overlay.</p> : null}
         </Row>
       </aside>

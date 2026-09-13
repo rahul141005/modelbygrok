@@ -103,9 +103,20 @@ export function getMaterials() {
   return cache;
 }
 
+let previousFaceTexture = null;
+
 export function applyFaceMap(tex) {
   const mats = getMaterials();
-  if (mats.face.userData.baseMap == null) mats.face.userData.baseMap = mats.face.map;
+  
+  if (previousFaceTexture && previousFaceTexture !== tex) {
+    previousFaceTexture.dispose();
+  }
+  
+  if (mats.face.userData.baseMap == null) {
+    mats.face.userData.baseMap = mats.face.map;
+  }
+  
   mats.face.map = tex || mats.face.userData.baseMap;
   mats.face.needsUpdate = true;
+  previousFaceTexture = tex;
 }
