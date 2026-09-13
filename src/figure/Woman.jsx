@@ -1,4 +1,4 @@
-import { useLayoutEffect, useMemo, useRef } from "react";
+import { useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createBodyGeometry, createHead, createLimb, createOffsetShell, createSkirtShell, morphAll } from "./geometry.js";
 import { makeHair } from "./hair.js";
 import { getMaterials, applyFaceMap } from "./materials.js";
@@ -41,9 +41,28 @@ function FaceFeatures({ mats }) {
   );
 }
 
+function LoadingPlaceholder() {
+  return (
+    <div style={{
+      position: "absolute",
+      top: "50%",
+      left: "50%",
+      transform: "translate(-50%, -50%)",
+      color: "var(--muted)",
+      fontSize: 12,
+      letterSpacing: "0.08em",
+      textTransform: "uppercase"
+    }}>
+      Initializing viewer...
+    </div>
+  );
+}
+
 export default function Woman() {
   const { bust, hips, outfit, faceTexture, clothed } = useViewer();
   const root = useRef();
+  const [ready, setReady] = useState(false);
+
   const mats = useMemo(() => getMaterials(), []);
 
   const hair = useMemo(() => makeHair(), []);
@@ -60,6 +79,7 @@ export default function Woman() {
     const casualBot = createOffsetShell(body, 0.014, 0.28, 0.62, 0.006);
     const dressGeo = createSkirtShell(body, 0.016, 0.12, 0.88, 0.11);
     const robeGeo = createSkirtShell(body, 0.028, 0.08, 0.9, 0.16);
+    setReady(true);
     return { body, head, arm, thigh, calf, lingerieTop, lingerieBot, casualTop, casualBot, dressGeo, robeGeo };
   }, []);
 
@@ -70,6 +90,8 @@ export default function Woman() {
   useLayoutEffect(() => {
     applyFaceMap(clothed ? faceTexture : null);
   }, [faceTexture, clothed]);
+
+  if (!ready) return <LoadingPlaceholder />;
 
   return (
     <group ref={root} position={[0, 0.02, 0]}>
@@ -100,11 +122,11 @@ export default function Woman() {
         <boxGeometry args={[0.068, 0.012, 0.03]} />
       </mesh>
 
-      <group visible={outfit.lingerie && !outfit.dress && !outfit.casual}>
+      <group visible={outfit.lingerie}>
         <mesh geometry={geos.lingerieTop} material={mats.lingerie} name="lingerieTop" castShadow />
         <mesh geometry={geos.lingerieBot} material={mats.lingerie} name="lingerieBot" castShadow />
       </group>
-      <group visible={outfit.casual && !outfit.dress}>
+      <group visible={outfit.casual}>
         <mesh geometry={geos.casualTop} material={mats.casualTop} name="casualTop" castShadow />
         <mesh geometry={geos.casualBot} material={mats.casualBottom} name="casualBot" castShadow />
       </group>

@@ -29,11 +29,34 @@ button {
   letter-spacing: 0.08em;
   text-transform: uppercase;
   font-size: 10px;
+  transition: border-color 0.2s, color 0.2s;
+}
+
+button:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
 }
 
 button.active, button:hover { border-color: var(--accent); color: var(--accent); }
 button:disabled { opacity: 0.35; cursor: not-allowed; }
 input[type="range"] { width: 100%; accent-color: var(--accent); }
+
+input[type="range"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+input[type="checkbox"] {
+  width: 16px;
+  height: 16px;
+  cursor: pointer;
+  accent-color: var(--accent);
+}
+
+input[type="checkbox"]:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
 
 .topbar {
   position: absolute;
@@ -46,7 +69,7 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   pointer-events: none;
   z-index: 2;
 }
-.topbar .row { pointer-events: auto; gap: 8px; display: flex; }
+.topbar .row { pointer-events: auto; gap: 8px; display: flex; flex-wrap: wrap; }
 .brand {
   font-family: "Cormorant Garamond", serif;
   font-size: 28px;
@@ -59,7 +82,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   position: absolute;
   right: 20px;
   bottom: 20px;
-  width: 300px;
+  max-width: 300px;
+  width: calc(100% - 48px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);
   backdrop-filter: blur(16px);
@@ -78,7 +104,10 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   position: absolute;
   left: 24px;
   bottom: 20px;
-  width: 340px;
+  max-width: 340px;
+  width: calc(100% - 48px);
+  max-height: calc(100vh - 40px);
+  overflow-y: auto;
   background: var(--panel);
   border: 1px solid var(--line);
   padding: 16px;
@@ -88,5 +117,35 @@ input[type="range"] { width: 100%; accent-color: var(--accent); }
   color: var(--muted);
 }
 .overlay b { color: var(--text); display: block; margin-bottom: 8px; letter-spacing: 0.08em; text-transform: uppercase; font-size: 10px; }
-.grid3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 6px; margin-top: 10px; }
+.grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
 .grid3 button { font-size: 8px; padding: 8px 4px; }
+
+@media (max-width: 600px) {
+  .topbar {
+    flex-direction: column;
+    gap: 12px;
+  }
+  .brand {
+    font-size: 22px;
+  }
+  .panel {
+    right: 10px;
+    left: 10px;
+    bottom: 10px;
+    width: auto;
+    max-width: none;
+  }
+  .overlay {
+    left: 10px;
+    right: 10px;
+    bottom: 10px;
+    width: auto;
+    max-width: none;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  button {
+    transition: none;
+  }
+}

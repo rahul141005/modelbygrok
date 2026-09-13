@@ -33,4 +33,3 @@ export const WARDROBE = {
   }
 };
 
-export const TOGGLE_ORDER = ["base", "lingerie", "casual", "dress", "robe"];
