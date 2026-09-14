@@ -263,6 +263,14 @@ export default function ClothingSystem({ bodyGeo, wardrobe = {}, outfit = {}, ma
     };
   }, [bodyGeo]);
 
+  // Dynamic PBR Materials with customized fabric profiles and color themes
+  const topMat = useMemo(() => getGarmentMaterial(mats.casualTop, "#f4f3ef", fabricType, colorTheme), [mats.casualTop, fabricType, colorTheme]);
+  const bottomMat = useMemo(() => getGarmentMaterial(mats.casualBottom, "#546e8c", fabricType === "cotton" ? "denim" : fabricType, colorTheme), [mats.casualBottom, fabricType, colorTheme]);
+  const dressMat = useMemo(() => getGarmentMaterial(mats.dress, "#721a28", fabricType === "cotton" ? "satin" : fabricType, colorTheme), [mats.dress, fabricType, colorTheme]);
+  const robeMat = useMemo(() => getGarmentMaterial(mats.robe, "#d8c8b6", "chiffon", colorTheme), [mats.robe, colorTheme]);
+  const blazerMat = useMemo(() => getGarmentMaterial(mats.casualTop, "#24252a", "wool", colorTheme), [mats.casualTop, colorTheme]);
+  const traditionalMat = useMemo(() => getGarmentMaterial(mats.dress, "#b24d3b", "silk", colorTheme), [mats.dress, colorTheme]);
+
   // Clean up GPU buffer geometries and materials on unmount/recreation
   useLayoutEffect(() => {
     return () => {
