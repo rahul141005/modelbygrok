@@ -1,7 +1,7 @@
 import { describe, it, expect } from 'vitest';
-import { bustAmt, hipAmt, lerp, clamp } from '../figure/geometry.js';
+import { bustAmt, hipAmt, lerp, clamp } from '../figure/morphs/MorphSystem.js';
 
-describe('geometry utilities', () => {
+describe('morph & math utilities', () => {
   describe('bustAmt', () => {
     it('returns 0 at neutral (0.42)', () => {
       expect(bustAmt(0.42)).toBeCloseTo(0, 10);

@@ -120,6 +120,83 @@ input[type="checkbox"]:focus-visible {
 .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin-top: 10px; }
 .grid3 button { font-size: 8px; padding: 8px 4px; }
 
+/* Character Studio Enhancements */
+.tab-bar {
+  display: flex;
+  gap: 4px;
+  border-bottom: 1px solid var(--line);
+  padding-bottom: 10px;
+  margin-bottom: 4px;
+  overflow-x: auto;
+}
+.tab-bar button {
+  font-size: 8.5px;
+  padding: 6px 8px;
+  white-space: nowrap;
+  border-radius: 2px;
+}
+.tab-bar button.active {
+  background: rgba(212, 196, 168, 0.15);
+}
+.reference-btn {
+  background: rgba(212, 196, 168, 0.1);
+  border-color: var(--accent);
+  color: var(--accent);
+  font-weight: 600;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  width: 100%;
+  padding: 10px 12px;
+}
+.reference-btn:hover {
+  background: rgba(212, 196, 168, 0.22);
+}
+.badge {
+  font-size: 8px;
+  padding: 2px 5px;
+  background: var(--accent);
+  color: #0b0b0c;
+  border-radius: 2px;
+  font-weight: 700;
+  letter-spacing: 0.06em;
+}
+.preset-grid {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 6px;
+}
+.preset-grid button {
+  padding: 8px 6px;
+  text-align: center;
+}
+.chip-grid {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+.chip-grid button {
+  padding: 6px 8px;
+  font-size: 9px;
+}
+.slider-group {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+.slider-row {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+.slider-header {
+  display: flex;
+  justify-content: space-between;
+  font-size: 10px;
+  color: var(--muted);
+  letter-spacing: 0.06em;
+}
+
 @media (max-width: 600px) {
   .topbar {
     flex-direction: column;

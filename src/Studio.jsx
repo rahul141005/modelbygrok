@@ -4,40 +4,61 @@ import { ContactShadows, Environment, OrbitControls } from "@react-three/drei";
 import Woman from "./figure/Woman.jsx";
 import { HERO_VIEWS } from "./bible.js";
 import { useViewer } from "./state.jsx";
+import {
+  LIGHTING_PRESETS,
+  STUDIO_BACKDROPS,
+  CAMERA_PRESETS
+} from "./presets/lightingPresets.js";
 
-function HeroCamera() {
-  const { heroView } = useViewer();
+function StudioCamera() {
+  const { heroView, cameraPreset } = useViewer();
   const { camera } = useThree();
   const controls = useRef();
 
   useEffect(() => {
-    const v = HERO_VIEWS[heroView] || HERO_VIEWS.front;
-    camera.position.set(...v.position);
-    controls.current?.target.set(...v.target);
+    const p =
+      CAMERA_PRESETS[cameraPreset] ||
+      (HERO_VIEWS[heroView]
+        ? {
+            position: HERO_VIEWS[heroView].position,
+            target: HERO_VIEWS[heroView].target,
+            fov: 32
+          }
+        : CAMERA_PRESETS.studio);
+
+    camera.position.set(...p.position);
+    if (p.fov && camera.fov !== p.fov) {
+      camera.fov = p.fov;
+      camera.updateProjectionMatrix();
+    }
+    controls.current?.target.set(...p.target);
     controls.current?.update();
-  }, [heroView, camera]);
+  }, [cameraPreset, heroView, camera]);
 
   return (
     <OrbitControls
       ref={controls}
       enablePan={false}
-      minDistance={1.4}
-      maxDistance={6}
-      minPolarAngle={0.4}
-      maxPolarAngle={1.55}
+      minDistance={0.8}
+      maxDistance={7}
+      minPolarAngle={0.2}
+      maxPolarAngle={1.65}
       target={[0, 0.92, 0]}
     />
   );
 }
 
-function Lights() {
+function StudioLights() {
+  const { lightingPreset } = useViewer();
+  const cfg = LIGHTING_PRESETS[lightingPreset] || LIGHTING_PRESETS.softStudio;
+
   return (
     <>
-      <hemisphereLight args={["#f2ebe0", "#3d342c", 0.55]} />
+      <hemisphereLight args={[cfg.ambient.color, cfg.ambient.ground, cfg.ambient.intensity]} />
       <directionalLight
-        position={[-2.4, 3.6, 3.2]}
-        intensity={2.1}
-        color="#fff4e8"
+        position={cfg.keyLight.position}
+        intensity={cfg.keyLight.intensity}
+        color={cfg.keyLight.color}
         castShadow
         shadow-mapSize={[2048, 2048]}
         shadow-camera-near={0.5}
@@ -47,31 +68,51 @@ function Lights() {
         shadow-camera-top={3}
         shadow-camera-bottom={-0.5}
       />
-      <directionalLight position={[3.2, 2.2, 1.2]} intensity={0.55} color="#c8d6ea" />
-      <directionalLight position={[0.2, 2.8, -3.4]} intensity={0.85} color="#fff0dc" />
-      <spotLight position={[0, 4.2, 2]} angle={0.5} penumbra={0.8} intensity={0.45} color="#ffffff" />
-      <Environment preset="studio" environmentIntensity={0.35} />
+      <directionalLight
+        position={cfg.fillLight.position}
+        intensity={cfg.fillLight.intensity}
+        color={cfg.fillLight.color}
+      />
+      <directionalLight
+        position={cfg.rimLight.position}
+        intensity={cfg.rimLight.intensity}
+        color={cfg.rimLight.color}
+      />
+      <spotLight
+        position={cfg.spotLight.position}
+        angle={0.5}
+        penumbra={0.8}
+        intensity={cfg.spotLight.intensity}
+        color={cfg.spotLight.color}
+      />
+      <Environment preset="studio" environmentIntensity={cfg.envIntensity || 0.35} />
     </>
   );
 }
 
-function Stage() {
+function StudioStage() {
+  const { backdrop } = useViewer();
+  const bd = STUDIO_BACKDROPS[backdrop] || STUDIO_BACKDROPS.dark;
+
   return (
     <>
       <mesh rotation={[-Math.PI / 2, 0, 0]} position={[0, 0, 0]} receiveShadow>
         <circleGeometry args={[6, 64]} />
-        <meshStandardMaterial color="#121110" roughness={0.92} />
+        <meshStandardMaterial color={bd.ground} roughness={0.92} />
       </mesh>
       <mesh position={[0, 2.4, -3.4]} receiveShadow>
         <planeGeometry args={[14, 8]} />
-        <meshStandardMaterial color="#161513" roughness={1} />
+        <meshStandardMaterial color={bd.hex} roughness={1} />
       </mesh>
       <ContactShadows position={[0, 0.01, 0]} opacity={0.45} scale={8} blur={2.2} far={3.5} />
     </>
   );
 }
 
-export default function Studio() {
+function StudioCanvas() {
+  const { backdrop } = useViewer();
+  const bd = STUDIO_BACKDROPS[backdrop] || STUDIO_BACKDROPS.dark;
+
   return (
     <Canvas
       shadows
@@ -79,11 +120,15 @@ export default function Studio() {
       gl={{ antialias: true, toneMappingExposure: 1.12 }}
       camera={{ position: [0, 1.05, 3.35], fov: 32, near: 0.1, far: 40 }}
     >
-      <color attach="background" args={["#0b0b0c"]} />
-      <Lights />
-      <Stage />
+      <color attach="background" args={[bd.hex]} />
+      <StudioLights />
+      <StudioStage />
       <Woman />
-      <HeroCamera />
+      <StudioCamera />
     </Canvas>
   );
+}
+
+export default function Studio() {
+  return <StudioCanvas />;
 }
