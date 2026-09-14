@@ -17,6 +17,7 @@ import ClothingSystem from "./clothing/ClothingSystem.jsx";
 import AccessorySystem from "./accessories/AccessorySystem.jsx";
 import { POSE_PRESETS } from "../presets/posePresets.js";
 import { morphAll } from "./morphs/MorphSystem.js";
+import { useCharacterAsset } from "./pipeline/AssetPipeline.js";
 
 const NAIL_COLORS = {
   natural: "#c98f8c",
@@ -84,6 +85,9 @@ export default function Solenne() {
 
   const root = useRef();
   const [ready, setReady] = useState(false);
+
+  // Production Blender Character Asset Pipeline
+  const { asset } = useCharacterAsset("/models/solenne.glb");
 
   // 1. Photorealistic Physical Materials
   const mats = useMemo(() => getSolenneMaterials(), []);
@@ -194,7 +198,52 @@ export default function Solenne() {
     }
   }, [bust, hips, geos]);
 
-  // 4. Face Overlay Management (Policy-Safe, Clothed Looks Only)
+  // 4. Drive GPU Morph Targets and Wardrobe on Blender Production Asset
+  useLayoutEffect(() => {
+    if (!asset) return;
+
+    asset.traverse((child) => {
+      if (child.isMesh) {
+        child.castShadow = true;
+        child.receiveShadow = true;
+
+        // Bind GPU Morph Targets
+        if (child.morphTargetDictionary && child.morphTargetInfluences) {
+          if ("Bust" in child.morphTargetDictionary) {
+            child.morphTargetInfluences[child.morphTargetDictionary["Bust"]] = bust;
+          }
+          if ("Hips" in child.morphTargetDictionary) {
+            child.morphTargetInfluences[child.morphTargetDictionary["Hips"]] = hips;
+          }
+          if ("Smile" in child.morphTargetDictionary) {
+            const smileAmt = (expression === "subtleSmile" || expression === "happy") ? 0.8 : (expression === "playful" ? 0.6 : 0.0);
+            child.morphTargetInfluences[child.morphTargetDictionary["Smile"]] = smileAmt;
+          }
+        }
+
+        // Dynamic Wardrobe Switching
+        if (child.name.includes("SilkSlipDress")) {
+          child.visible = Boolean(clothed && (outfit?.dress || wardrobe?.dress || wardrobe?.outfit === "silkSlip"));
+        } else if (child.name.includes("CropTank")) {
+          child.visible = Boolean(clothed && (outfit?.casual || wardrobe?.top));
+        } else if (child.name.includes("DenimShorts")) {
+          child.visible = Boolean(clothed && (outfit?.casual || wardrobe?.bottom));
+        } else if (child.name.includes("Jhumka")) {
+          child.visible = accessories?.earrings !== false;
+        }
+
+        // Custom Face Map Texture Override (Clothed Looks Only)
+        if (child.name === "Solenne_Head" && child.material) {
+          if (clothed && faceTexture) {
+            child.material.map = faceTexture;
+            child.material.needsUpdate = true;
+          }
+        }
+      }
+    });
+  }, [asset, bust, hips, expression, wardrobe, outfit, clothed, accessories, faceTexture]);
+
+  // 5. Face Overlay Management (Policy-Safe, Clothed Looks Only)
   useLayoutEffect(() => {
     applySolenneFaceMap(clothed ? faceTexture : null);
   }, [faceTexture, clothed]);
@@ -212,43 +261,51 @@ export default function Solenne() {
       scale={[1 + (body?.shoulderWidth || 0), body?.heightScale || 1.0, 1]}
       name="character_solenne"
     >
-      {/* 1. One Coherent, Continuous Human Body Mesh (Zero Seams, Zero Gaps) */}
-      <mesh
-        geometry={geos.unifiedBody}
-        material={bodyMaterials}
-        castShadow
-        receiveShadow
-        name="unified_human_body"
-      />
+      {asset ? (
+        /* Blender 5.2 Production Model with GPU Morph Targets & PBR Shaders */
+        <primitive object={asset} name="solenne_blender_production_model" />
+      ) : (
+        /* Seamless Procedural Fallback Engine */
+        <>
+          {/* 1. One Coherent, Continuous Human Body Mesh (Zero Seams, Zero Gaps) */}
+          <mesh
+            geometry={geos.unifiedBody}
+            material={bodyMaterials}
+            castShadow
+            receiveShadow
+            name="unified_human_body"
+          />
 
-      {/* 2. 3D Facial Structures, Volumetric Hair & Head Jewelry */}
-      <group position={[0, headY, headZ]} rotation={headRot} name="head_assembly">
-        <FaceFeatures
-          mats={mats}
-          faceMorphs={face}
-          expression={expression}
-          eyes={eyes}
-          beauty={beauty}
-        />
-        <HairSystem mats={mats} hairState={hair} />
-        <AccessorySystem accessories={accessories} mode="head" />
-      </group>
+          {/* 2. 3D Facial Structures, Volumetric Hair & Head Jewelry */}
+          <group position={[0, headY, headZ]} rotation={headRot} name="head_assembly">
+            <FaceFeatures
+              mats={mats}
+              faceMorphs={face}
+              expression={expression}
+              eyes={eyes}
+              beauty={beauty}
+            />
+            <HairSystem mats={mats} hairState={hair} />
+            <AccessorySystem accessories={accessories} mode="head" />
+          </group>
 
-      {/* 3. Subtle Toenail Accents */}
-      <mesh geometry={geos.nailLeft} material={nailMat} name="toenails_left" />
-      <mesh geometry={geos.nailRight} material={nailMat} name="toenails_right" />
+          {/* 3. Subtle Toenail Accents */}
+          <mesh geometry={geos.nailLeft} material={nailMat} name="toenails_left" />
+          <mesh geometry={geos.nailRight} material={nailMat} name="toenails_right" />
 
-      {/* 4. Body & Hand Accessories (Bracelets, Rings) */}
-      <AccessorySystem accessories={accessories} mode="body" poseConfig={poseConfig} />
+          {/* 4. Body & Hand Accessories (Bracelets, Rings) */}
+          <AccessorySystem accessories={accessories} mode="body" poseConfig={poseConfig} />
 
-      {/* 5. Tailored Wardrobe System */}
-      <ClothingSystem
-        bodyGeo={geos.posedTorso}
-        wardrobe={wardrobe}
-        outfit={outfit}
-        mats={mats}
-        poseConfig={poseConfig}
-      />
+          {/* 5. Tailored Wardrobe System */}
+          <ClothingSystem
+            bodyGeo={geos.posedTorso}
+            wardrobe={wardrobe}
+            outfit={outfit}
+            mats={mats}
+            poseConfig={poseConfig}
+          />
+        </>
+      )}
     </group>
   );
 }
